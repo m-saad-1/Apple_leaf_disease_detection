@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apple Leaf Disease Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: Arial; background: #f7f7f7; padding:50px; text-align:center; }
+        .container { background:white; padding:30px; border-radius:10px; display:inline-block; max-width:500px; box-shadow:0 0 15px rgba(0,0,0,0.1);}
+        input[type="file"] { margin: 20px 0; }
+        #preview { max-width: 300px; border-radius:10px; margin-top:20px; }
+        .note { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .metric { font-size:18px; margin:5px 0; }
+        #result-container { margin-top:20px; display:none; }
+        button { padding:10px 20px; font-size:16px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer; }
+        button:hover { background:#45a049; }
+        .error { color:red; margin-top:10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Apple Leaf Disease Detection</h1>
+        <div id="error-msg" class="error"></div>
+
+        <form id="leaf-form">
+            <input type="file" name="leaf_image" id="leaf_image" accept="image/*" onchange="previewFile()" required>
+            <br>
+            <img id="preview" src="" alt="Image Preview">
+            <br>
+            <button type="submit">Predict</button>
+        </form>
+
+        <div id="result-container">
+            <div class="metric">Disease: <strong id="disease"></strong></div>
+            <div class="metric">Confidence: <strong id="confidence"></strong></div>
+            <div class="metric">Margin: <strong id="margin"></strong></div>
+            <div id="note" class="note"></div>
+        </div>
+    </div>
+
+    <script>
+        function previewFile() {
+            const preview = document.getElementById('preview');
+            const file = document.getElementById('leaf_image').files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onloadend = () => { preview.src = reader.result; };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('leaf-form').addEventListener('submit', function(e){
+            e.preventDefault();
+            const fileInput = document.getElementById('leaf_image');
+            const file = fileInput.files[0];
+            if(!file){
+                document.getElementById('error-msg').innerText = "Please select a file!";
+                return;
+            }
+            document.getElementById('error-msg').innerText = "";
+
+            const formData = new FormData();
+            formData.append('leaf_image', file);
+
+            fetch('/predict', { method:'POST', body:formData })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result-container').style.display = 'block';
+                document.getElementById('disease').innerText = data.disease;
+                document.getElementById('confidence').innerText = data.confidence.toFixed(2);
+                document.getElementById('margin').innerText = data.margin.toFixed(2);
+                if(data.note){
+                    document.getElementById('note').innerText = data.note;
+                    document.getElementById('note').className = "note";
+                } else {
+                    document.getElementById('note').innerText = "Prediction is reliable";
+                    document.getElementById('note').className = "success";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('error-msg').innerText = "Prediction failed. Try again.";
+            });
+        });
+    </script>
+</body>
+</html>
