@@ -2,116 +2,418 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apple Leaf Disease Detection</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body { font-family: Arial; background:#f7f7f7; padding:50px; text-align:center; }
-        .container { background:white; padding:30px; border-radius:10px; display:inline-block; max-width:500px; box-shadow:0 0 15px rgba(0,0,0,0.1);}
-        input[type="file"] { margin: 20px 0; }
-        #preview { max-width: 300px; border-radius:10px; margin-top:20px; }
-        .note { font-weight: bold; margin-top:10px; }
-        .success { color: green; }
-        .warning { color: orange; }
-        .error { color: red; }
-        .metric { font-size:18px; margin:5px 0; }
-        #result-container { margin-top:20px; display:none; }
-        #loader { display:none; margin-top:10px; }
-        button { padding:10px 20px; font-size:16px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer; }
-        button:hover { background:#45a049; }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Apple Leaf Disease Detection</h1>
-        <div id="error-msg" class="error"></div>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🍎 Apple Leaf Disease Detection</h1>
+        <p>Two-Stage AI Classification System with Explainability</p>
+    </div>
 
-        <form id="leaf-form">
-            <input type="file" name="leaf_image" id="leaf_image" accept="image/*" required>
-            <br>
-            <img id="preview" src="" alt="Image Preview">
-            <br>
-            <div id="loader">Predicting... <span>⏳</span></div>
-            <button type="submit">Predict</button>
-        </form>
+    <!-- Error Banner -->
+    <div id="error-msg" class="error-banner"></div>
 
-        <div id="result-container">
-            <div class="metric">Disease: <strong id="disease"></strong></div>
-            <div class="metric">Confidence: <strong id="confidence"></strong></div>
-            <div class="metric">Margin: <strong id="margin"></strong></div>
-            <div id="note" class="note"></div>
+    <!-- Two Column Layout -->
+    <div class="two-column-container">
+        <!-- Left Column -->
+        <div class="left-column">
+            <!-- Upload Section -->
+            <section class="section upload-section">
+                <h2 class="section-title">Upload Image</h2>
+                <div id="upload-area" class="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <p>Click or drag & drop to upload</p>
+                    <input type="file" id="leaf_image" accept="image/*" hidden>
+                    <button class="btn-upload" onclick="document.getElementById('leaf_image').click()">Choose File</button>
+                </div>
+                <div id="preview-container" class="preview-container" style="display: none;">
+                    <img id="preview-image" src="" alt="Uploaded Image">
+                    <div class="preview-actions">
+                        <button id="cancel-btn" class="btn-cancel" type="button" style="display: none;">Cancel</button>
+                        <button id="upload-btn" class="btn-upload" type="button" style="display: none;">Upload New Image</button>
+                        <button id="predict-btn" class="btn-predict" type="button" style="display: none;">Predict</button>
+                    </div>
+                    <div id="loading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Analyzing image...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <div id="results-section" style="display: none;">
+                <!-- Stage 1 Result -->
+                <section class="section">
+                    <h2 class="section-title">Stage 1: Apple Leaf Detection</h2>
+                    <div id="stage1-result" class="result-box"></div>
+                </section>
+
+                <!-- Stage 2 Result -->
+                <section id="stage2-section" class="section" style="display: none;">
+                    <h2 class="section-title">Stage 2: Disease Classification</h2>
+                    <div id="stage2-result" class="result-box"></div>
+                </section>
+
+                <!-- Final Diagnosis -->
+                <section class="section">
+                    <h2 class="section-title">Final Diagnosis</h2>
+                    <div id="final-diagnosis" class="diagnosis-box"></div>
+                </section>
+
+                <!-- Reset Button -->
+                <button id="reset-btn" class="btn-reset">Analyze Another Image</button>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <!-- Placeholder -->
+            <div id="gradcam-placeholder" class="placeholder">
+                <div class="placeholder-icon">🔍</div>
+                <p>Upload an image to view AI explainability visualization</p>
+            </div>
+
+            <!-- Grad-CAM Section -->
+            <div id="gradcam-section" style="display: none;">
+                <section class="section">
+                    <h2 class="section-title">Grad-CAM Visualization</h2>
+                    <div class="gradcam-image-container">
+                        <img id="gradcam-image" src="" alt="Grad-CAM Heatmap">
+                    </div>
+                </section>
+
+                <section class="section">
+                    <h2 class="section-title">Attention Map Analysis</h2>
+                    <div id="attention-analysis" class="info-box"></div>
+                </section>
+
+                <section class="section">
+                    <h2 class="section-title">Explainability Details</h2>
+                    <div id="explainability-details" class="info-box"></div>
+                </section>
+            </div>
         </div>
     </div>
 
     <script>
-        const preview = document.getElementById('preview');
+        // DOM Elements
         const fileInput = document.getElementById('leaf_image');
-        const resultContainer = document.getElementById('result-container');
-        const loader = document.getElementById('loader');
+        const uploadArea = document.getElementById('upload-area');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const uploadBtn = document.getElementById('upload-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const loading = document.getElementById('loading');
         const errorMsg = document.getElementById('error-msg');
-        const submitButton = document.querySelector('button');
+        const resultsSection = document.getElementById('results-section');
+        const stage1Result = document.getElementById('stage1-result');
+        const stage2Section = document.getElementById('stage2-section');
+        const stage2Result = document.getElementById('stage2-result');
+        const finalDiagnosis = document.getElementById('final-diagnosis');
+        const gradcamPlaceholder = document.getElementById('gradcam-placeholder');
+        const gradcamSection = document.getElementById('gradcam-section');
+        const gradcamImage = document.getElementById('gradcam-image');
+        const attentionAnalysis = document.getElementById('attention-analysis');
+        const explainabilityDetails = document.getElementById('explainability-details');
+        const resetBtn = document.getElementById('reset-btn');
+        let selectedFile = null;
+        let predictionAborted = false;
 
-        function displayResult(data){
-            resultContainer.style.display = 'block';
-            document.getElementById('disease').innerText = data.disease;
-            document.getElementById('confidence').innerText = data.confidence.toFixed(2);
-            document.getElementById('margin').innerText = data.margin.toFixed(2);
+        // File upload event
+        fileInput.addEventListener('change', handleFileSelect);
+        uploadBtn.addEventListener('click', () => {
+            // Open file picker to select new image
+            document.getElementById('leaf_image').click();
+        });
+        document.getElementById('predict-btn').addEventListener('click', () => {
+            if (selectedFile) {
+                predict(selectedFile);
+            }
+        });
+        cancelBtn.addEventListener('click', cancelPrediction);
 
-            const noteEl = document.getElementById('note');
-            if(data.disease === "Unknown / Not Apple Leaf"){
-                noteEl.innerText = data.note;
-                noteEl.className = "note error";
-            } else if(data.note){
-                noteEl.innerText = data.note;
-                noteEl.className = "note warning";
-            } else {
-                noteEl.innerText = "Prediction is reliable";
-                noteEl.className = "note success";
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                selectedFile = file;
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    uploadArea.style.display = 'none';
+                    // Show only cancel button during auto-prediction
+                    cancelBtn.style.display = 'inline-block';
+                    uploadBtn.style.display = 'none';
+                    document.getElementById('predict-btn').style.display = 'none';
+                    // Auto-start prediction
+                    predictionAborted = false;
+                    predict(selectedFile);
+                };
+                reader.readAsDataURL(file);
+                errorMsg.style.display = 'none';
             }
         }
 
-        function previewFileAndPredict(){
-            const file = fileInput.files[0];
-            if(!file) return;
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                preview.src = reader.result;
-                predictImage(file);
-            };
-            reader.readAsDataURL(file);
+        function cancelPrediction() {
+            // Mark as aborted to skip results display
+            predictionAborted = true;
+            // Show upload and predict buttons instead of full reset
+            loading.style.display = 'none';
+            cancelBtn.style.display = 'none';
+            uploadBtn.style.display = 'inline-block';
+            document.getElementById('predict-btn').style.display = 'inline-block';
         }
 
-        function predictImage(file){
-            loader.style.display = "block";
-            resultContainer.style.display = "none";
-            submitButton.disabled = true;
+        function resetAll() {
+            selectedFile = null;
+            fileInput.value = '';
+            previewImage.src = '';
+            previewContainer.style.display = 'none';
+            uploadArea.style.display = 'block';
+            loading.style.display = 'none';
+            resultsSection.style.display = 'none';
+            gradcamSection.style.display = 'none';
+            gradcamPlaceholder.style.display = 'block';
+            // Reset button states
+            cancelBtn.style.display = 'none';
+            uploadBtn.style.display = 'none';
+            document.getElementById('predict-btn').style.display = 'none';
+        }
+
+        function predict(file) {
+            // Show loading, hide results
+            loading.style.display = 'block';
+            cancelBtn.style.display = 'inline-block';
+            cancelBtn.disabled = false;
+            uploadBtn.style.display = 'none';
+            document.getElementById('predict-btn').style.display = 'none';
+            resultsSection.style.display = 'none';
+            gradcamSection.style.display = 'none';
+            gradcamPlaceholder.style.display = 'block';
+            errorMsg.style.display = 'none';
 
             const formData = new FormData();
             formData.append('leaf_image', file);
 
-            fetch('/predict', { method:'POST', body:formData })
+            fetch('/predict', { method: 'POST', body: formData })
                 .then(response => response.json())
                 .then(data => {
-                    loader.style.display = "none";
-                    submitButton.disabled = false;
-                    displayResult(data);
+                    // Only display results if prediction wasn't aborted
+                    if (!predictionAborted) {
+                        loading.style.display = 'none';
+                        cancelBtn.style.display = 'none';
+                        uploadBtn.style.display = 'inline-block';
+                        document.getElementById('predict-btn').style.display = 'inline-block';
+                        if (data.success) {
+                            displayResults(data);
+                        } else {
+                            showError(data.error || 'Prediction failed');
+                        }
+                    }
                 })
                 .catch(err => {
-                    loader.style.display = "none";
-                    submitButton.disabled = false;
-                    errorMsg.innerText = "Prediction failed. Try again.";
-                    console.error(err);
+                    if (!predictionAborted) {
+                        loading.style.display = 'none';
+                        cancelBtn.style.display = 'none';
+                        uploadBtn.style.display = 'inline-block';
+                        document.getElementById('predict-btn').style.display = 'inline-block';
+                        showError('Error: ' + (err.message || 'Prediction failed'));
+                    }
                 });
         }
 
-        fileInput.addEventListener('change', previewFileAndPredict);
+        function displayResults(data) {
+            resultsSection.style.display = 'block';
+            gradcamPlaceholder.style.display = 'none';
+            gradcamSection.style.display = 'block';
 
-        // Optional manual submit (backup)
-        document.getElementById('leaf-form').addEventListener('submit', function(e){
-            e.preventDefault();
-            const file = fileInput.files[0];
-            if(file) predictImage(file);
-        });
+            // Stage 1 Result
+            displayStage1(data);
+
+            // Stage 2 Result (if applicable)
+            if (data.stage === 2) {
+                stage2Section.style.display = 'block';
+                displayStage2(data);
+            } else {
+                stage2Section.style.display = 'none';
+            }
+
+            // Final Diagnosis
+            displayFinalDiagnosis(data);
+
+            // Grad-CAM
+            if (data.gradcam_image) {
+                displayGradCAM(data);
+            }
+        }
+
+        function displayStage1(data) {
+            const stage1 = (data.details && data.details.stage1) ? data.details.stage1 : data;
+            const stage1Category = stage1.category || data.category || '';
+            const stage1Confidence = Number(stage1.confidence ?? 0);
+            const stage1Margin = Number(stage1.margin ?? 0);
+            const icon = stage1Category === 'Not_Apple_Leaf' ? '❌' : 
+                         stage1Category === 'Apple_Healthy' ? '✅' : '⚠️';
+            const status = stage1Category === 'Not_Apple_Leaf' ? 'rejected' : 
+                          stage1Category === 'Apple_Healthy' ? 'healthy' : 'diseased';
+            
+            stage1Result.className = 'result-box ' + status;
+            stage1Result.innerHTML = `
+                <div class="result-header">
+                    <span class="result-icon">${icon}</span>
+                    <span class="result-text">${formatCategory(stage1Category)}</span>
+                </div>
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span>Confidence:</span>
+                        <strong>${(stage1Confidence * 100).toFixed(1)}%</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Margin:</span>
+                        <strong>${(stage1Margin * 100).toFixed(2)}%</strong>
+                    </div>
+                </div>
+                ${data.message ? `<p class="result-message">${data.message}</p>` : ''}
+            `;
+        }
+
+        function displayStage2(data) {
+            const stage2 = (data.details && data.details.stage2) ? data.details.stage2 : data;
+            const stage2Disease = stage2.disease || data.disease || '';
+            const stage2DiseaseDisplay = stage2.disease_display || data.disease_display || 'Disease';
+            const stage2Confidence = Number(stage2.confidence ?? 0);
+            const stage2Margin = Number(stage2.margin ?? 0);
+            const icon = stage2Disease === 'Apple___healthy' ? '✅' : '🦠';
+            const status = stage2Disease === 'Apple___healthy' ? 'healthy' : 'diseased';
+            
+            stage2Result.className = 'result-box ' + status;
+            stage2Result.innerHTML = `
+                <div class="result-header">
+                    <span class="result-icon">${icon}</span>
+                    <span class="result-text">${stage2DiseaseDisplay}</span>
+                </div>
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span>Confidence:</span>
+                        <strong>${(stage2Confidence * 100).toFixed(1)}%</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Margin:</span>
+                        <strong>${(stage2Margin * 100).toFixed(2)}%</strong>
+                    </div>
+                </div>
+                ${data.description ? `<p class="result-message">${data.description}</p>` : ''}
+            `;
+        }
+
+        function displayFinalDiagnosis(data) {
+            let icon, title, message, status;
+
+            if (data.category === 'Not_Apple_Leaf') {
+                icon = '❌';
+                title = 'Not an Apple Leaf';
+                message = 'The uploaded image does not appear to be an apple leaf.';
+                status = 'rejected';
+            } else if (data.stage === 2) {
+                if (data.disease === 'Apple___healthy') {
+                    icon = '✅';
+                    title = 'Healthy Leaf';
+                    message = 'No disease detected. The leaf appears to be healthy.';
+                    status = 'healthy';
+                } else {
+                    icon = '⚠️';
+                    title = data.disease_display;
+                    message = data.message || 'Disease detected on the leaf.';
+                    status = 'diseased';
+                }
+            } else {
+                icon = '⏳';
+                title = 'Processing';
+                message = 'Classification in progress.';
+                status = 'neutral';
+            }
+
+            finalDiagnosis.className = 'diagnosis-box ' + status;
+            finalDiagnosis.innerHTML = `
+                <div class="diagnosis-icon">${icon}</div>
+                <div class="diagnosis-content">
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function displayGradCAM(data) {
+            gradcamImage.src = data.gradcam_image;
+            const explainMetrics = (data.details && data.details.stage2) ? data.details.stage2 : data;
+
+            // Attention Analysis
+            attentionAnalysis.innerHTML = `
+                <p>The Grad-CAM (Gradient-weighted Class Activation Mapping) heatmap highlights the regions 
+                that most influenced the AI's decision. Warmer colors (red, yellow) indicate higher attention, 
+                while cooler colors (blue, purple) show lower attention areas.</p>
+            `;
+
+            // Explainability Details
+            let explanation = '';
+            if (data.stage === 1) {
+                explanation = 'Stage 1 focused on determining whether the image contains an apple leaf. ';
+                explanation += 'The highlighted regions were crucial for this classification.';
+            } else if (data.stage === 2) {
+                if (data.disease === 'Apple___healthy') {
+                    explanation = 'The AI examined the leaf structure and found no signs of disease. ';
+                    explanation += 'The highlighted areas show healthy tissue patterns.';
+                } else {
+                    explanation = 'Disease symptoms were detected in the highlighted regions. ';
+                    explanation += 'The AI identified characteristic patterns associated with ' + data.disease_display + '.';
+                }
+            }
+
+            explainabilityDetails.innerHTML = `
+                <p><strong>Interpretation:</strong> ${explanation}</p>
+                <p><strong>Confidence Level:</strong> ${(Number(explainMetrics.confidence ?? 0) * 100).toFixed(1)}%</p>
+                <p><strong>Decision Margin:</strong> ${(Number(explainMetrics.margin ?? 0) * 100).toFixed(2)}% (difference from next best prediction)</p>
+            `;
+        }
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+
+        function formatCategory(category) {
+            if (!category) {
+                return 'Unknown';
+            }
+            return String(category).replace(/_/g, ' ');
+        }
+
+        // Reset button
+        resetBtn.addEventListener('click', resetAll);
     </script>
 </body>
 </html>
