@@ -381,9 +381,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💼 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+**Muhammad Saad**
+- GitHub: [@m-saad-1](https://github.com/m-saad-1)
+- Email: msaad23305@gmail.com
 
 ## 🙏 Acknowledgments
 
@@ -408,7 +408,7 @@ This system is designed for educational and research purposes. For agricultural 
 
 For issues, questions, or suggestions:
 - Open an Issue on GitHub
-- Email: your.email@example.com
+- Email: msaad23305@gmail.com
 - Check existing documentation and FAQs
 
 ---
