@@ -7,6 +7,17 @@ A deep learning-based Flask web application for detecting diseases in apple leav
 ![Flask](https://img.shields.io/badge/Flask-2.3-green.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
+## 🧰 Technologies Used
+
+- **Programming Language**: Python 3.8+
+- **Deep Learning**: TensorFlow / Keras
+- **Web Framework**: Flask
+- **Computer Vision / Image Processing**: OpenCV
+- **Model Architecture**: EfficientNet (Stage 1), Custom CNN (Stage 2)
+- **Explainability**: Grad-CAM
+- **Frontend**: HTML, CSS (Flask templates)
+- **Utilities**: NumPy, Pillow (PIL)
+
 ## 🌟 Features
 
 - **Two-Stage Classification Pipeline**
@@ -29,32 +40,32 @@ A deep learning-based Flask web application for detecting diseases in apple leav
 ┌─────────────────────────────────────────────────────────────┐
 │                    User Input (Image)                        │
 └───────────────────────┬─────────────────────────────────────┘
-                        │
-        ┌───────────────▼───────────────┐
-        │   Stage 1: Apple Detection     │
-        │  (EfficientNet-based Classifier)
-        └───────────────┬───────────────┘
-                        │
-         ┌──────────────┼──────────────┐
-         │              │              │
-    ┌────▼────┐  ┌─────▼──┐  ┌────────▼─────┐
-    │  Health │  │Diseased│  │ Not an Apple │
-    │   Leaf  │  │  Leaf  │  │     Leaf     │
-    └────┬────┘  └────┬───┘  └────────┬─────┘
-         │            │              │
-    ┌────▼────┐   ┌───▼──────┐   ┌───▼──────┐
-    │ Return  │   │  Stage 2 │   │  Reject  │
-    │Healthy  │   │ Disease  │   │  Request │
-    └─────────┘   │Classifier│   └──────────┘
-                  └────┬─────┘
                        │
-            ┌──────────┴──────────┐
-            │                     │
-        ┌───▼────┐         ┌──────▼────┐
-        │Disease │         │Grad-CAM   │
-        │Type    │         │Heatmap    │
-        │(+ conf)│         │(Optional) │
-        └────────┘         └───────────┘
+       ┌───────────────▼───────────────┐
+       │   Stage 1: Apple Detection     │
+       │  (EfficientNet-based Classifier)
+       └───────────────┬───────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+   ┌────▼────┐  ┌─────▼──┐  ┌────────▼─────┐
+   │  Health │  │Diseased│  │ Not an Apple │
+   │   Leaf  │  │  Leaf  │  │     Leaf     │
+   └────┬────┘  └────┬───┘  └────────┬─────┘
+        │            │              │
+   ┌────▼────┐   ┌───▼──────┐   ┌───▼──────┐
+   │ Return  │   │  Stage 2 │   │  Reject  │
+   │Healthy  │   │ Disease  │   │  Request │
+   └─────────┘   │Classifier│   └──────────┘
+                 └────┬─────┘
+                      │
+           ┌──────────┴──────────┐
+           │                     │
+       ┌───▼────┐         ┌──────▼────┐
+       │Disease │         │Grad-CAM   │
+       │Type    │         │Heatmap    │
+       │(+ conf)│         │(Optional) │
+       └────────┘         └───────────┘
 ```
 
 ## 📦 Installation
@@ -413,5 +424,5 @@ For issues, questions, or suggestions:
 
 ---
 
-**Last Updated**: March 2026  
+**Last Updated**: 2026-03-12 10:55:17  
 **Version**: 1.0.0
