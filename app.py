@@ -90,9 +90,10 @@ def predict():
             return jsonify(result), status_code
 
         except Exception as e:
+            print(f"[ERROR] Prediction failed: {str(e)}")
             return jsonify({
                 "success": False,
-                "error": f"Server error during prediction: {str(e)}",
+                "error": "An error occurred during prediction. Please try again with a different image.",
                 "stage": 0
             }), 500
     

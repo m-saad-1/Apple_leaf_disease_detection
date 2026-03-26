@@ -36,7 +36,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
     if not os.path.exists(img_path):
         return {
             "success": False,
-            "error": f"Image file not found: {img_path}",
+            "error": "Image file not found",
             "stage": 0,
             "category": "Error",
             "disease": None,
@@ -52,7 +52,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
     if stage1_result["category"] == "Error":
         return {
             "success": False,
-            "error": stage1_result["message"],
+            "error": "An error occurred during leaf detection. Please try again.",
             "stage": 1,
             "category": "Error",
             "disease": None,
@@ -108,7 +108,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
         if stage2_result["disease"] == "Error":
             return {
                 "success": False,
-                "error": stage2_result["message"],
+                "error": "An error occurred during disease classification. Please try again.",
                 "stage": 2,
                 "category": "Apple_Diseased",
                 "disease": None,

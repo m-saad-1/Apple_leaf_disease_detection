@@ -38,7 +38,15 @@ try:
         stage2_class_names = json.load(f)
 
 except Exception as e:
-    stage2_load_error = str(e)
+    # Log full error for debugging but sanitize for user-facing message
+    error_str = str(e)
+    print(f"[ERROR] Failed to load Stage 2 model: {error_str}")
+    
+    # Check if this is a Keras deserialization error
+    if "deserialize" in error_str.lower() or "keras" in error_str.lower():
+        stage2_load_error = "Model incompatibility - please ensure TensorFlow and Keras versions match"
+    else:
+        stage2_load_error = "Failed to load model file"
 
 # Load configuration
 STAGE2_CONF = get_stage2_config()
@@ -73,7 +81,7 @@ def classify_stage2(img_path, confidence_threshold=None, margin_threshold=None):
                 "confidence": 0.0,
                 "margin": 0.0,
                 "description": "",
-                "message": f"Stage 2 model unavailable: {stage2_load_error}"
+                "message": "Model unavailable. Please check system configuration."
             }
 
         # Use config thresholds if not provided
