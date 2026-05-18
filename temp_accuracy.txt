@@ -1,0 +1,67 @@
+Epoch 1/5
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 157ms/step - accuracy: 0.7178 - loss: 0.7551
+Epoch 1: val_accuracy improved from None to 0.91198, saving model to /content/drive/MyDrive/leaf_model_best.keras
+
+Epoch 1: finished saving model to /content/drive/MyDrive/leaf_model_best.keras
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m530s[0m 2s/step - accuracy: 0.8383 - loss: 0.5016 - val_accuracy: 0.9120 - val_loss: 0.2862 - learning_rate: 0.0010
+Epoch 2/5
+[1m276/277[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 124ms/step - accuracy: 0.9279 - loss: 0.2460
+Epoch 2: val_accuracy improved from 0.91198 to 0.93898, saving model to /content/drive/MyDrive/leaf_model_best.keras
+
+Epoch 2: finished saving model to /content/drive/MyDrive/leaf_model_best.keras
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m44s[0m 157ms/step - accuracy: 0.9300 - loss: 0.2324 - val_accuracy: 0.9390 - val_loss: 0.1915 - learning_rate: 0.0010
+Epoch 3/5
+[1m276/277[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 124ms/step - accuracy: 0.9467 - loss: 0.1799
+Epoch 3: val_accuracy did not improve from 0.93898
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m83s[0m 161ms/step - accuracy: 0.9471 - loss: 0.1754 - val_accuracy: 0.9349 - val_loss: 0.1826 - learning_rate: 0.0010
+Epoch 4/5
+[1m276/277[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 119ms/step - accuracy: 0.9566 - loss: 0.1584
+Epoch 4: val_accuracy improved from 0.93898 to 0.95488, saving model to /content/drive/MyDrive/leaf_model_best.keras
+
+Epoch 4: finished saving model to /content/drive/MyDrive/leaf_model_best.keras
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m44s[0m 157ms/step - accuracy: 0.9545 - loss: 0.1529 - val_accuracy: 0.9549 - val_loss: 0.1393 - learning_rate: 0.0010
+Epoch 5/5
+[1m276/277[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 120ms/step - accuracy: 0.9563 - loss: 0.1464
+Epoch 5: val_accuracy improved from 0.95488 to 0.95858, saving model to /content/drive/MyDrive/leaf_model_best.keras
+
+Epoch 5: finished saving model to /content/drive/MyDrive/leaf_model_best.keras
+[1m277/277[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m44s[0m 159ms/step - accuracy: 0.9556 - loss: 0.1410 - val_accuracy: 0.9586 - val_loss: 0.1286 - learning_rate: 0.0010
+Restoring model weights from the end of the best epoch: 5.
+Model saved to Google Drive.
+Training history saved to Google Drive.
+
+[1m85/85[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m527s[0m 6s/step - accuracy: 0.9480 - loss: 0.1490
+
+========================================
+Test Loss     : 0.1490
+Test Accuracy : 0.9480  (94.80%)
+========================================
+
+Generating predictions for test set...
+Classification Report:
+                   precision    recall  f1-score   support
+
+      Apple scab       0.96      0.86      0.91       702
+       Black rot       1.00      0.98      0.99       689
+Cedar apple rust       1.00      0.96      0.98       610
+         healthy       0.86      1.00      0.92       693
+
+        accuracy                           0.95      2694
+       macro avg       0.95      0.95      0.95      2694
+    weighted avg       0.95      0.95      0.95      2694
+
+Report saved to /content/drive/MyDrive/Apple_Leaf_Project/outputs/classification_report.csv
+
+
+TFLite Quantized Model Accuracy (10 batches): 85.94%
+Accuracy is maintained after quantization.
+
+
+======================================================================
+DEPLOYMENT SUMMARY TABLE
+======================================================================
+    Model Format Size (MB) Inference Latency (ms) Test Accuracy
+  Keras (.keras)     16.33                 170.19        94.80%
+     TFLite FP32     15.31                  27.18             —
+TFLite Quantized      4.34                  52.88        85.94%
+======================================================================

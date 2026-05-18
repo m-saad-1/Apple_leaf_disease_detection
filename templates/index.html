@@ -358,11 +358,20 @@
             }
 
             finalDiagnosis.className = 'diagnosis-box ' + status;
+            
+            let latencyHtml = '';
+            if (data.latency_ms) {
+                latencyHtml = `<div class="latency-info" style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    <span title="Inference Latency">⚡ Processing Time: <strong>${data.latency_ms} ms</strong></span>
+                </div>`;
+            }
+
             finalDiagnosis.innerHTML = `
                 <div class="diagnosis-icon">${icon}</div>
                 <div class="diagnosis-content">
                     <h3>${title}</h3>
                     <p>${message}</p>
+                    ${latencyHtml}
                 </div>
             `;
         }

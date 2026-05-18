@@ -32,6 +32,9 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
               Stage 2 results include 'gradcam_image' field with path to explainability visualization.
     """
 
+    import time
+    start_time = time.time()
+
     # Validate image file exists
     if not os.path.exists(img_path):
         return {
@@ -40,7 +43,8 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
             "stage": 0,
             "category": "Error",
             "disease": None,
-            "confidence": 0.0
+            "confidence": 0.0,
+            "latency_ms": 0.0
         }
 
     # ====================
@@ -56,7 +60,8 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
             "stage": 1,
             "category": "Error",
             "disease": None,
-            "confidence": 0.0
+            "confidence": 0.0,
+            "latency_ms": round((time.time() - start_time) * 1000, 2)
         }
 
     # If not an apple leaf - return as a valid detection outcome
@@ -69,6 +74,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
             "disease": None,
             "confidence": stage1_result["confidence"],
             "message": stage1_result["message"],
+            "latency_ms": round((time.time() - start_time) * 1000, 2),
             "details": {
                 "stage1": {
                     "category": stage1_result["category"],
@@ -89,6 +95,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
             "disease_display": "Healthy",
             "confidence": stage1_result["confidence"],
             "message": "This apple leaf is healthy and shows no signs of disease.",
+            "latency_ms": round((time.time() - start_time) * 1000, 2),
             "details": {
                 "stage1": {
                     "category": stage1_result["category"],
@@ -113,6 +120,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
                 "category": "Apple_Diseased",
                 "disease": None,
                 "confidence": 0.0,
+                "latency_ms": round((time.time() - start_time) * 1000, 2),
                 "details": {
                     "stage1": {
                         "category": stage1_result["category"],
@@ -164,6 +172,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
             "description": stage2_result["description"],
             "message": stage2_result["message"],
             "gradcam_image": gradcam_image,  # Path to Grad-CAM visualization
+            "latency_ms": round((time.time() - start_time) * 1000, 2),
             "details": {
                 "stage1": {
                     "category": stage1_result["category"],
@@ -201,6 +210,7 @@ def predict_leaf_disease(img_path, enable_gradcam=True):
         "category": stage1_result["category"],
         "disease": None,
         "confidence": stage1_result.get("confidence", 0.0),
+        "latency_ms": round((time.time() - start_time) * 1000, 2),
         "details": {
             "stage1": {
                 "category": stage1_result.get("category"),

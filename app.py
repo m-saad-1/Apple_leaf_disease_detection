@@ -111,4 +111,4 @@ def not_found_error(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=FLASK_DEBUG, host=FLASK_HOST, port=FLASK_PORT)
+    app.run(debug=FLASK_DEBUG, host=FLASK_HOST, port=FLASK_PORT, use_reloader=False)

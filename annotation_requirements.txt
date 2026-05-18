@@ -1,0 +1,5 @@
+labelImg
+pandas
+opencv-python
+Pillow
+matplotlib

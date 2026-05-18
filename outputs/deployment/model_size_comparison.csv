@@ -1,0 +1,9 @@
+model,format,size_mb,compression_ratio
+stage1_model,keras,16.32,1.00
+stage1_model,float32,15.33,1.06
+stage1_model,quantized,4.36,3.74
+stage1_model,full_int8,4.71,3.47
+leaf_model2,keras,16.33,1.00
+leaf_model2,float32,15.33,1.07
+leaf_model2,quantized,4.36,3.74
+leaf_model2,full_int8,4.71,3.47

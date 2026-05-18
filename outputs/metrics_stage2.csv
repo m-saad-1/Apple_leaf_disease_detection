@@ -1,0 +1,6 @@
+class,precision,recall,f1_score,support
+Apple___Apple_scab,0.9535,0.8462,0.8966,702
+Apple___Black_rot,0.9786,0.9956,0.9871,689
+Apple___Cedar_apple_rust,1.0000,0.9328,0.9652,610
+Apple___healthy,0.8589,0.9928,0.9210,693
+MACRO_AVG,0.9477,0.9418,0.9425,2694

@@ -29,7 +29,7 @@ STAGE1_MODEL_PATH = "models/stage1_model.keras"
 STAGE1_CLASS_NAMES_PATH = "models/stage1_class_names.json"
 
 # Stage 2: Disease Classification
-STAGE2_MODEL_PATH = "models/leaf_model2.keras"
+STAGE2_MODEL_PATH = "models/leaf_model_best.keras"
 STAGE2_CLASS_NAMES_PATH = "models/class_names.json"
 
 # ====================

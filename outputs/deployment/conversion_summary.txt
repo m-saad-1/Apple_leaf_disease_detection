@@ -1,0 +1,15 @@
+TFLite Conversion Summary
+==================================================
+
+Model: stage1_model.keras
+  Original (.keras): 16.32 MB
+  float32: 15.33 MB (compression: 1.06x)
+  quantized: 4.36 MB (compression: 3.74x)
+  full_int8: 4.71 MB (compression: 3.47x)
+
+Model: leaf_model2.keras
+  Original (.keras): 16.33 MB
+  float32: 15.33 MB (compression: 1.07x)
+  quantized: 4.36 MB (compression: 3.74x)
+  full_int8: 4.71 MB (compression: 3.47x)
+
