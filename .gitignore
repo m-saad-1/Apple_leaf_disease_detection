@@ -175,3 +175,10 @@ $RECYCLE.BIN/
 
 # Rich Text Format
 *.rtf
+
+# Custom project ignores
+dataset/
+data/
+outputs/
+eval_tflite_out.txt
+temp_accuracy.txt
