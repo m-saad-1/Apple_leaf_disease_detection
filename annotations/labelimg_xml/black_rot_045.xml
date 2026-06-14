@@ -1,0 +1,38 @@
+<annotation>
+	<folder>Apple___Black_rot</folder>
+	<filename>black_rot_045.JPG</filename>
+	<path>D:\WEB DEVELOPMENT\Apple_leaf_detection\annotations\selected_images\Apple___Black_rot\black_rot_045.JPG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>256</width>
+		<height>256</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>label</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>107</xmin>
+			<ymin>66</ymin>
+			<xmax>190</xmax>
+			<ymax>110</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>label</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>149</xmin>
+			<ymin>14</ymin>
+			<xmax>192</xmax>
+			<ymax>62</ymax>
+		</bndbox>
+	</object>
+</annotation>

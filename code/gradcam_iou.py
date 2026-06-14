@@ -160,7 +160,7 @@ def evaluate_gradcam_iou(model_path, images_dir, annotations_dir, output_dir, th
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Grad-CAM using IoU")
-    parser.add_argument('--model', type=str, default='../models/leaf_model_best.keras', help="Path to trained model")
+    parser.add_argument('--model', type=str, default='../models/stage_2.keras', help="Path to trained model")
     parser.add_argument('--images', type=str, default='../data/test_images', help="Directory with test images")
     parser.add_argument('--annotations', type=str, default='../annotations/masks', help="Directory with ground truth masks")
     parser.add_argument('--output', type=str, default='../outputs/gradcam', help="Output directory")
@@ -168,3 +168,4 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     evaluate_gradcam_iou(args.model, args.images, args.annotations, args.output, args.threshold)
+

@@ -1,0 +1,26 @@
+<annotation>
+	<folder>Apple___Apple_scab</folder>
+	<filename>scab_025.JPG</filename>
+	<path>D:\WEB DEVELOPMENT\Apple_leaf_detection\annotations\selected_images\Apple___Apple_scab\scab_025.JPG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>256</width>
+		<height>256</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>label</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1</xmin>
+			<ymin>100</ymin>
+			<xmax>151</xmax>
+			<ymax>167</ymax>
+		</bndbox>
+	</object>
+</annotation>

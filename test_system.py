@@ -27,7 +27,7 @@ def test_model_loading():
 
     # Check Stage 1 files
     print("\nStage 1 Model:")
-    stage1_model_path = "models/stage1_model.keras"
+    stage1_model_path = "models/stage_1.keras"
     stage1_classes_path = "models/stage1_class_names.json"
 
     if not os.path.exists(stage1_model_path):
@@ -54,7 +54,7 @@ def test_model_loading():
 
     # Check Stage 2 files
     print("\nStage 2 Model:")
-    stage2_model_path = "models/leaf_model2.keras"
+    stage2_model_path = "models/stage_2.keras"
     stage2_classes_path = "models/class_names.json"
 
     if not os.path.exists(stage2_model_path):
@@ -324,3 +324,4 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+

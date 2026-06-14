@@ -58,8 +58,9 @@ def convert_to_tflite(model_path, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert Keras model to TFLite")
-    parser.add_argument('--model', type=str, default='../models/leaf_model_best.keras', help="Path to trained model")
+    parser.add_argument('--model', type=str, default='../models/stage_2.keras', help="Path to trained model")
     parser.add_argument('--output', type=str, default='../outputs/deployment', help="Output directory")
     
     args = parser.parse_args()
     convert_to_tflite(args.model, args.output)
+

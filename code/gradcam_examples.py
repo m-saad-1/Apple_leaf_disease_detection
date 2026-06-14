@@ -58,10 +58,11 @@ def batch_generate_gradcam(model_path, images_dir, output_dir, limit=5):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate Grad-CAM examples")
-    parser.add_argument('--model', type=str, default='../models/leaf_model_best.keras', help="Path to trained model")
+    parser.add_argument('--model', type=str, default='../models/stage_2.keras', help="Path to trained model")
     parser.add_argument('--images', type=str, default='../dataset/test', help="Directory containing test images")
     parser.add_argument('--output', type=str, default='../outputs/gradcam', help="Output directory")
     parser.add_argument('--limit', type=int, default=5, help="Maximum number of images to process")
     
     args = parser.parse_args()
     batch_generate_gradcam(args.model, args.images, args.output, args.limit)
+

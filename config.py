@@ -25,11 +25,11 @@ SECRET_KEY = 'apple-leaf-detection-secret-2026'
 # ====================
 
 # Stage 1: Apple Leaf Detection
-STAGE1_MODEL_PATH = "models/stage1_model.keras"
+STAGE1_MODEL_PATH = "models/stage_1.keras"
 STAGE1_CLASS_NAMES_PATH = "models/stage1_class_names.json"
 
 # Stage 2: Disease Classification
-STAGE2_MODEL_PATH = "models/leaf_model_best.keras"
+STAGE2_MODEL_PATH = "models/stage_2.keras"
 STAGE2_CLASS_NAMES_PATH = "models/class_names.json"
 
 # ====================
@@ -233,7 +233,8 @@ if __name__ == "__main__":
         for error in errors:
             print(f"  - {error}")
     else:
-        print("✓ Configuration validation passed")
+        print("[PASS] Configuration validation passed")
         print(f"  Stage 1 Model: {STAGE1_MODEL_PATH}")
         print(f"  Stage 2 Model: {STAGE2_MODEL_PATH}")
         print(f"  Upload Folder: {UPLOAD_FOLDER}")
+

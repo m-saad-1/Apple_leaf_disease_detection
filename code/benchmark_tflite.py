@@ -91,10 +91,11 @@ def benchmark_models(keras_model_path, tflite_model_path, output_dir, num_runs=1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark inference latency")
-    parser.add_argument('--keras_model', type=str, default='../models/leaf_model_best.keras', help="Path to Keras model")
+    parser.add_argument('--keras_model', type=str, default='../models/stage_2.keras', help="Path to Keras model")
     parser.add_argument('--tflite_model', type=str, default='../outputs/deployment/model_dynamic_quant.tflite', help="Path to TFLite model")
     parser.add_argument('--output', type=str, default='../outputs/deployment', help="Output directory")
     parser.add_argument('--runs', type=int, default=100, help="Number of benchmark runs")
     
     args = parser.parse_args()
     benchmark_models(args.keras_model, args.tflite_model, args.output, args.runs)
+

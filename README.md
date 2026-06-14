@@ -79,8 +79,8 @@ A deep learning-based Flask web application for detecting diseases in apple leav
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/apple-leaf-detection.git
-   cd apple-leaf-detection
+   git clone https://github.com/m-saad-1/Apple_leaf_disease_detection.git
+   cd Apple_leaf_disease_detection
    ```
 
 2. **Create a virtual environment** (recommended)
@@ -152,8 +152,8 @@ FLASK_DEBUG = True           # Debug mode
 
 ### Model Paths
 ```python
-STAGE1_MODEL_PATH = "models/stage1_model.keras"
-STAGE2_MODEL_PATH = "models/leaf_model_best.keras"
+STAGE1_MODEL_PATH = "models/stage_1.keras"
+STAGE2_MODEL_PATH = "models/stage_2.keras"
 ```
 
 ### Classification Thresholds
@@ -209,9 +209,9 @@ apple-leaf-detection/
 │
 ├── Models & Data
 ├── models/
-│   ├── stage1_model.keras          # Stage 1 model
+│   ├── stage_1.keras          # Stage 1 model
 │   ├── stage1_class_names.json     # Stage 1 class labels
-│   ├── leaf_model2.keras           # Stage 2 model
+│   ├── stage_2.keras           # Stage 2 model
 │   └── class_names.json            # Stage 2 class labels
 │
 ├── Web Interface

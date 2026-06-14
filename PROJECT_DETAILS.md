@@ -1,264 +1,269 @@
-# Apple Leaf Disease Detection System
+# Apple Leaf Disease Detection: Research Paper Details
+
+Last reviewed: 2026-05-30
+
+## 1. Study Scope and Goal
+
+This repository implements an explainable deep-learning system for apple leaf disease analysis using a two-stage inference pipeline and Grad-CAM-based visual explanations.
 
-## Overview
+Primary goal:
+- Detect whether an uploaded image is an apple leaf and triage healthy vs diseased (Stage 1).
+- Classify disease type for diseased leaves (Stage 2).
+- Provide visual evidence (Grad-CAM) to support interpretation.
 
-This project is a Flask-based deep learning application for detecting diseases in apple leaf images. It uses a two-stage classification pipeline to first verify whether an image is an apple leaf, then identify the specific disease if the leaf is diseased. The system also generates Grad-CAM visual explanations so users can see which regions influenced the prediction.
+Intended paper focus:
+- Classification performance.
+- Explainability quality (localization against lesion annotations).
+- Robustness under image distortions.
+- Deployment feasibility with TFLite compression.
 
-## What the system does
+## 2. Project Structure (Reviewed)
 
-- Accepts an uploaded leaf image through a web UI.
-- Checks whether the image is an apple leaf.
-- Short-circuits if the leaf is healthy or rejects the image if it is not an apple leaf.
-- Runs a second classifier only when the leaf is diseased.
-- Returns the disease class, confidence values, and an optional Grad-CAM heatmap.
+Core inference stack:
+- `app.py`: Flask server and `/predict` API.
+- `unified_classifier.py`: end-to-end two-stage orchestration.
+- `stage1_classifier.py`: Stage 1 prediction wrapper.
+- `leaf_classifier.py`: Stage 2 prediction wrapper.
+- `utils/image_processing.py`: shared preprocessing.
+- `explainability/gradcam_disease_focused.py`: disease-focused Grad-CAM pipeline.
 
-## Dataset
+Evaluation and analysis:
+- `code/evaluate.py`: Stage 2 test-set evaluation.
+- `code/robustness_test.py`: perturbation robustness checks.
+- `code/evaluate_tflite.py`: TFLite accuracy evaluation.
+- `outputs/`: generated figures, reports, and CSV metrics.
+- `annotations/`: lesion annotations and conversion outputs.
 
-The repository does not include the training dataset itself, but the class files and model outputs show the dataset schema used for training.
+## 3. Dataset and Splits
+
+On-disk split counts (verified from `dataset/`):
 
-### Stage 1 dataset labels
+| Split | Apple scab | Black rot | Cedar apple rust | Healthy | Total |
+|---|---:|---:|---:|---:|---:|
+| Train | 2294 | 2257 | 2007 | 2286 | 8844 |
+| Validation | 702 | 690 | 614 | 698 | 2704 |
+| Test | 702 | 689 | 610 | 693 | 2694 |
+| **Grand total** | 3698 | 3636 | 3231 | 3677 | **14242** |
 
-The first model is trained on three categories:
+Annotation dataset for XAI evaluation (`annotations/real_gradcam_annotations.csv`):
+- 168 unique annotated images.
+- 542 lesion bounding boxes.
+- Class-wise boxes:
+  - Class 0 (Apple scab): 155
+  - Class 1 (Black rot): 153
+  - Class 2 (Cedar apple rust): 234
 
-- Apple_Diseased
-- Apple_Healthy
-- Not_Apple_Leaf
+## 4. Methodology
 
-This stage appears designed to filter out non-apple images and separate healthy from diseased apple leaves.
+### 4.1 Two-stage decision flow
 
-### Stage 2 dataset labels
+1. Stage 1 predicts one of:
+- `Apple_Diseased`
+- `Apple_Healthy`
+- `Not_Apple_Leaf`
 
-The second model is trained on four disease classes:
+2. Decision logic:
+- If `Not_Apple_Leaf`: reject image.
+- If `Apple_Healthy`: return healthy result.
+- If `Apple_Diseased`: run Stage 2 disease classifier.
 
-- Apple___Apple_scab
-- Apple___Black_rot
-- Apple___Cedar_apple_rust
-- Apple___healthy
+3. Stage 2 predicts one of:
+- `Apple___Apple_scab`
+- `Apple___Black_rot`
+- `Apple___Cedar_apple_rust`
+- `Apple___healthy`
 
-These labels match a standard apple leaf disease classification task where the model predicts a specific disease or healthy leaf status.
+### 4.2 Preprocessing
 
-### Dataset-driven behavior
+Shared preprocessing (`utils/image_processing.py`):
+- RGB conversion.
+- Center crop to square.
+- Resize to 224x224.
+- EfficientNet preprocessing.
 
-- Stage 1 acts as a gatekeeper for input validity.
-- Stage 2 specializes in disease-level classification.
-- The class-name JSON files in the models folder confirm the exact label order used at inference time.
+### 4.3 Thresholding policy (from `config.py`)
 
-## Models
+- Stage 1:
+  - Confidence threshold = 0.70
+  - Margin threshold = 0.15
+- Stage 2:
+  - Confidence threshold = 0.75
+  - Margin threshold = 0.20
 
-### Stage 1 model
+A prediction is treated as reliable only if both confidence and top-2 margin pass thresholds.
+
+### 4.4 Explainability approach
 
-- File: `models/stage1_model.keras`
-- Class names: `models/stage1_class_names.json`
-- Purpose: apple leaf detection and coarse health triage
-- Input size: 224 x 224 RGB
-- Output: 3-class softmax prediction
-- Architecture: EfficientNet-based transfer learning, as described in the project documentation and preprocessing pipeline
+`gradcam_disease_focused.py` adds post-processing beyond plain Grad-CAM:
+- Edge suppression via Sobel-based mask.
+- Dark-region suppression.
+- Morphological filtering.
+- Contrast enhancement (CLAHE).
 
-### Stage 2 model
+This is designed to reduce edge-focused saliency and emphasize lesion-like regions.
 
-- File: `models/leaf_model2.keras`
-- Class names: `models/class_names.json`
-- Purpose: disease classification for apple leaves
-- Input size: 224 x 224 RGB
-- Output: 4-class softmax prediction
-- Architecture: EfficientNet-based model, likely fine-tuned for apple disease recognition
+## 5. Quantitative Results (Available Artifacts)
 
-### Inference design
+### 5.1 Stage 2 classification performance
 
-The system loads both models at startup and uses confidence and margin thresholds to decide whether a prediction is strong enough to return.
+From `outputs/classification_report_stage2.txt`:
+- Overall Accuracy: **0.9417** on 2694 test images.
 
-## Framework and libraries
+Class-wise metrics:
 
-The project uses the following stack:
+| Class | Precision | Recall | F1 | Support |
+|---|---:|---:|---:|---:|
+| Apple___Apple_scab | 0.9535 | 0.8462 | 0.8966 | 702 |
+| Apple___Black_rot | 0.9786 | 0.9956 | 0.9871 | 689 |
+| Apple___Cedar_apple_rust | 1.0000 | 0.9328 | 0.9652 | 610 |
+| Apple___healthy | 0.8589 | 0.9928 | 0.9210 | 693 |
+| **Macro avg** | 0.9477 | 0.9418 | 0.9425 | 2694 |
 
-- Python 3.8+
-- TensorFlow 2.14.0
-- Keras 2.14.0
-- Flask 2.3.2
-- OpenCV 4.7.0.72
-- Pillow 10.0.0
-- NumPy 1.26.4
-- Gunicorn 21.2.0 for production serving
-- python-dotenv 1.0.0 for environment configuration support
+Additional training log artifact (`temp_accuracy.txt`) reports:
+- Test Accuracy: 0.9480 (94.80%)
+- This suggests multiple runs/checkpoints were evaluated.
 
-## Application structure
+### 5.2 Robustness under distortions
 
-### Main files
+From `outputs/robustness/robustness_results_stage_2.csv`:
+- Gaussian Noise: accuracy drops from 0.95 (severity 0) to 0.50 (severity 75).
+- Gaussian Blur: mostly robust up to high severity (0.90 at severity 9).
+- Brightness Shift: robust across moderate shifts; 0.85 at severity 0.4.
 
-- `app.py`: Flask application entry point and HTTP routes
-- `unified_classifier.py`: orchestrates the two-stage prediction flow
-- `stage1_classifier.py`: apple leaf detection model inference
-- `leaf_classifier.py`: disease classification model inference
-- `predict.py`: command-line prediction helper
-- `config.py`: centralized configuration, paths, thresholds, and disease metadata
+From `outputs/occlusion_robustness_results.csv`:
+- Occlusion 10%: 0.9443
+- Occlusion 20%: 0.9347
+- Occlusion 30%: 0.9065
+- Occlusion 40%: 0.8545
 
-### Supporting folders
+Robustness AUC summary (`outputs/robustness_auc_summary.csv`):
+- Occlusion AUC: **0.9135**
 
-- `templates/`: HTML pages for the web interface
-- `static/css/`: UI styling
-- `static/uploads/`: uploaded images stored temporarily
-- `static/gradcam/`: generated explainability outputs
-- `utils/`: image preprocessing helpers
-- `explainability/`: Grad-CAM implementations
-- `models/`: trained model files and class metadata
+### 5.3 Explainability localization results
 
-## Image preprocessing
+From `outputs/real_gradcam_iou_results.csv` (111 lesion boxes evaluated):
+- Mean Grad-CAM IoU: **0.0308**
+- Mean lesion coverage: **0.3276**
 
-All model inputs go through a shared preprocessing pipeline in `utils/image_processing.py`.
+Per-class summary:
 
-### Steps
+| Class | Boxes | Mean IoU | Mean Coverage | Non-zero IoU boxes |
+|---|---:|---:|---:|---:|
+| Apple scab | 33 | 0.0594 | 0.3876 | 20 |
+| Black rot | 27 | 0.0312 | 0.6107 | 20 |
+| Cedar apple rust | 51 | 0.0121 | 0.1389 | 18 |
 
-1. Load the image with Pillow.
-2. Convert to RGB.
-3. Optionally center-crop to square.
-4. Resize to 224 x 224.
-5. Convert to a NumPy array.
-6. Add a batch dimension.
-7. Apply EfficientNet preprocessing, which normalizes pixel values to the expected range.
+Interpretation for paper discussion:
+- Localization overlap is currently low (IoU), despite moderate lesion coverage.
+- This supports a nuanced conclusion: class prediction can remain strong while explanation localization is less precise.
+
+### 5.4 Deployment and compression
+
+From `outputs/deployment/conversion_summary.txt` and `model_size_comparison.csv`:
+- Approximate Keras size per model: 16.32-16.33 MB
+- TFLite float32: 15.33 MB
+- TFLite dynamic quantized: 4.36 MB
+- Compression ratio (quantized vs Keras): ~3.74x (about 73.3% size reduction)
+
+From `temp_accuracy.txt` deployment summary:
+- Keras latency: 170.19 ms (reported in log summary table artifact)
+- TFLite FP32 latency: 27.18 ms
+- TFLite quantized latency: 52.88 ms
+- Quantized TFLite quick-check accuracy (10 batches): 85.94%
+
+## 6. Reproducibility Commands
+
+Environment:
+```bash
+pip install -r requirements.txt
+```
+
+Run server:
+```bash
+python app.py
+```
+
+Stage 2 evaluation:
+```bash
+python code/evaluate.py --model models/stage_2.keras --classes models/class_names.json --dataset dataset/test --output outputs
+```
+
+Robustness test:
+```bash
+python code/robustness_test.py --model models/stage_2.keras --dataset dataset/test --output outputs/robustness
+```
+
+TFLite evaluation:
+```bash
+python code/evaluate_tflite.py --tflite_path outputs/deployment/stage2_model_quantized.tflite --data_dir dataset/test
+```
+
+## 7. Complete Project Review (Important Findings)
+
+### 7.1 Current reproducibility blockers
+
+1. Model filename mismatch (critical)
+- `config.py` expects:
+  - `models/stage_1.keras`
+  - `models/stage_2.keras`
+- Actual files present:
+  - `models/stage_1.keras`
+  - `models/stage_2.keras`
+- Running `python config.py` currently reports missing models.
+
+2. Test script encoding failure on Windows console
+- `python test_system.py` fails with `UnicodeEncodeError` due checkmark characters under cp1252 console encoding.
+- This prevents complete automated validation unless UTF-8 output is enforced.
+
+3. Inconsistent historical naming across files
+- Some scripts/docs refer to `stage_2.keras`, others to `stage_2.keras`, while current directory has `stage_2.keras`.
+- Same issue appears for Stage 1 naming (`stage_1.keras` vs `stage_1.keras`).
+
+### 7.2 Methodological limitations to declare in paper
+
+- Stage 1 quantitative metrics are not packaged as a formal report artifact in `outputs/`.
+- Training pipeline scripts are not fully present; reproducibility currently relies on saved artifacts/logs.
+- Explainability localization scores (IoU) are low, so claims should avoid overstating lesion-level alignment.
+- Some robustness evaluations appear to run on sampled subsets (script-level speed limits), which should be reported transparently.
+
+## 8. Recommended Pre-submission Cleanup
+
+1. Standardize model filenames and paths across `config.py`, scripts, tests, and docs.
+2. Add a single reproducibility script that runs all evaluations and exports a consolidated metrics table.
+3. Add Stage 1 evaluation report (accuracy, per-class precision/recall/F1, confusion matrix).
+4. Fix console encoding in tests (or remove Unicode symbols) for cross-platform execution.
+5. Add an experiment manifest (`seed`, hardware, package versions, dataset checksum) for paper appendix.
+
+## 9. Suggested Paper Positioning (Based on Current Evidence)
+
+Strong claims supported:
+- High Stage 2 classification performance on test split.
+- Significant model size reduction via quantization.
+- Robustness degrades gracefully for occlusion and brightness, but noise is a major failure mode.
+
+Careful claims advised:
+- Explainability quality should be discussed as partial/limited due low IoU.
+- End-to-end reproducibility currently requires path harmonization and test-script cleanup.
+
+## 10. Artifact Pointers
+
+Main result artifacts:
+- `outputs/classification_report_stage2.txt`
+- `outputs/metrics_stage2.csv`
+- `outputs/confusion_matrix_stage2.png`
+- `outputs/robustness/robustness_results_stage_2.csv`
+- `outputs/occlusion_robustness_results.csv`
+- `outputs/robustness_auc_summary.csv`
+- `outputs/real_gradcam_iou_results.csv`
+- `outputs/deployment/conversion_summary.txt`
+- `outputs/deployment/model_size_comparison.csv`
+- `temp_accuracy.txt`
+
+Methodology figures:
+- `methodology_figures/Fig1_System_Pipeline.png`
+- `methodology_figures/Fig2_EfficientNetB0_Architecture.png`
+- `methodology_figures/Fig3_XAI_Methods_Technical.png`
+- `methodology_figures/Fig4_Annotation_Evaluation.png`
+- `methodology_figures/Fig5_Robustness_Protocol.png`
+- `methodology_figures/Fig6_Methodology_Summary.png`
 
-### Why this matters
-
-- Keeps Stage 1 and Stage 2 preprocessing consistent.
-- Reduces the effect of noisy backgrounds.
-- Matches the input shape expected by the EfficientNet-based classifiers.
-
-## Explainability
-
-The project includes Grad-CAM to make predictions interpretable.
-
-### Available implementations
-
-- `explainability/gradcam.py`: general Grad-CAM implementation with automatic last-convolution-layer detection.
-- `explainability/gradcam_disease_focused.py`: the primary explainability module, tuned to suppress leaf-edge artifacts and emphasize disease regions.
-- `explainability/gradcam_enhanced.py`: compatibility wrapper that forwards to the disease-focused implementation.
-- `explainability/gradcam_simple.py`: simpler alternative implementation.
-
-### What the explainability module does
-
-- Locates the last convolutional layer automatically.
-- Computes gradient-based activation maps.
-- Suppresses edge regions that often correspond to leaf borders rather than disease.
-- Produces a heatmap overlay saved under `static/gradcam/`.
-
-## Evaluation and testing
-
-The repository contains test scripts that validate the pipeline end to end.
-
-### Test files
-
-- `test_system.py`: checks model loading, preprocessing, and prediction flow.
-- `test_gradcam_direct.py`: validates Grad-CAM generation directly.
-- `test_gradcam_ui.py`: checks the UI integration for Grad-CAM output.
-
-### What evaluation should cover
-
-- Model loading success for both stages.
-- Correct class-name mapping.
-- Preprocessing consistency.
-- Stage 1 classification correctness.
-- Stage 2 disease classification correctness.
-- Confidence and margin threshold behavior.
-- Grad-CAM generation and visual quality.
-
-### Runtime thresholds
-
-The configuration file sets the default decision thresholds:
-
-- Stage 1 confidence threshold: 0.70
-- Stage 1 margin threshold: 0.15
-- Stage 2 confidence threshold: 0.75
-- Stage 2 margin threshold: 0.20
-
-These thresholds help avoid weak or ambiguous predictions.
-
-## Configuration
-
-`config.py` centralizes the most important runtime settings.
-
-### Key settings
-
-- Upload folder: `static/uploads`
-- Allowed file types: `png`, `jpg`, `jpeg`
-- Max upload size: 16 MB
-- Flask host: `0.0.0.0`
-- Flask port: `5001`
-- Debug mode: enabled
-
-### Disease metadata
-
-The configuration file also includes:
-
-- Human-readable disease display names
-- Disease descriptions
-- Treatment recommendations
-
-This makes the output more useful than a raw class prediction.
-
-## Web interface
-
-The UI is rendered with Flask templates and styled using `static/css/style.css`.
-
-### User flow
-
-1. Open the homepage.
-2. Upload an apple leaf image.
-3. Preview the image.
-4. Run prediction.
-5. Review Stage 1 result.
-6. If diseased, review Stage 2 result and Grad-CAM heatmap.
-
-### Frontend elements
-
-- Upload area with drag-and-drop support
-- Preview panel
-- Prediction button
-- Result sections for Stage 1 and Stage 2
-- Final diagnosis summary
-
-## Prediction flow
-
-The decision logic in `unified_classifier.py` works like this:
-
-1. Validate that the image exists.
-2. Run Stage 1.
-3. If the image is not an apple leaf, stop and return a rejection.
-4. If the leaf is healthy, return a healthy result immediately.
-5. If the leaf is diseased, run Stage 2.
-6. Optionally generate Grad-CAM for the disease result.
-
-## Deployment and usage
-
-### Local run
-
-- Create and activate a virtual environment.
-- Install dependencies from `requirements.txt`.
-- Start the app with `python app.py`.
-
-### CLI usage
-
-`python predict.py <image_path>`
-
-### Production considerations
-
-- Gunicorn is included for deployment.
-- The app is stateless apart from uploaded files and generated Grad-CAM images.
-- Model loading happens at startup, so deployment should ensure the `.keras` files are present.
-
-## Strengths of the project
-
-- Two-stage design improves robustness.
-- Transfer-learning-based models reduce training cost.
-- Centralized configuration makes tuning easier.
-- Grad-CAM improves trust and interpretability.
-- The project includes both web and CLI interfaces.
-- Validation scripts support testing and debugging.
-
-## Notes and limitations
-
-- The training dataset itself is not stored in the repository.
-- Exact training metrics such as accuracy, precision, recall, and F1 score are not included in the visible files.
-- The repository appears optimized for inference and presentation rather than full training reproducibility.
-
-## Short summary
-
-This is a well-structured apple leaf disease detection project built with Flask and TensorFlow. It uses EfficientNet-based classifiers in a two-stage pipeline, supports image preprocessing and Grad-CAM explainability, and includes configuration, testing, and deployment support.

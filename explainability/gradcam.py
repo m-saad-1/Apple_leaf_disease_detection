@@ -598,4 +598,5 @@ if __name__ == "__main__":
     else:
         print("Usage: python gradcam.py <model_path> <image_path> [last_conv_layer_name]")
         print("\nExample:")
-        print("  python gradcam.py models/leaf_model2.keras test_image.jpg")
+        print("  python gradcam.py models/stage_2.keras test_image.jpg")
+

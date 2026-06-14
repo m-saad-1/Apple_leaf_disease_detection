@@ -124,9 +124,10 @@ def evaluate_robustness(model_path, dataset_dir, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate model robustness")
-    parser.add_argument('--model', type=str, default='../models/leaf_model_best.keras', help="Path to trained model")
+    parser.add_argument('--model', type=str, default='../models/stage_2.keras', help="Path to trained model")
     parser.add_argument('--dataset', type=str, default='../dataset/test', help="Path to test dataset folder")
     parser.add_argument('--output', type=str, default='../outputs/robustness', help="Output directory")
     
     args = parser.parse_args()
     evaluate_robustness(args.model, args.dataset, args.output)
+

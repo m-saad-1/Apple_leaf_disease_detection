@@ -98,10 +98,11 @@ def evaluate_model(model_path, class_names_path, dataset_path, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate trained Apple Leaf Disease Model")
-    parser.add_argument('--model', type=str, default='../models/leaf_model_best.keras', help="Path to trained .keras model")
+    parser.add_argument('--model', type=str, default='../models/stage_2.keras', help="Path to trained .keras model")
     parser.add_argument('--classes', type=str, default='../models/class_names.json', help="Path to class names JSON")
     parser.add_argument('--dataset', type=str, default='../dataset/test', help="Path to test dataset folder")
     parser.add_argument('--output', type=str, default='../outputs', help="Output directory")
     
     args = parser.parse_args()
     evaluate_model(args.model, args.classes, args.dataset, args.output)
+

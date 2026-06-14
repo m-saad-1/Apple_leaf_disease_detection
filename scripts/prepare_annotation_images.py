@@ -17,7 +17,7 @@ DISEASE_CLASSES = [
     "Apple___Cedar_apple_rust"
 ]
 
-IMAGES_PER_CLASS = 10
+IMAGES_PER_CLASS = 50
 
 def prepare_images():
     print(f"Checking dataset path: {TEST_FOLDER} (or {DATASET_PATH})")

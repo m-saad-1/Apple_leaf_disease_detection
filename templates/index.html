@@ -3,99 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apple Leaf Disease Detection</title>
+    <title>Apple Leaf Disease Detection | AI Diagnostic System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>🍎 Apple Leaf Disease Detection</h1>
-        <p>Two-Stage AI Classification System with Explainability</p>
-    </div>
-
-    <!-- Error Banner -->
-    <div id="error-msg" class="error-banner"></div>
-
-    <!-- Two Column Layout -->
-    <div class="two-column-container">
-        <!-- Left Column -->
-        <div class="left-column">
-            <!-- Upload Section -->
-            <section class="section upload-section">
-                <h2 class="section-title">Upload Image</h2>
-                <div id="upload-area" class="upload-area">
-                    <div class="upload-icon">📁</div>
-                    <p>Click or drag & drop to upload</p>
-                    <input type="file" id="leaf_image" accept="image/*" hidden>
-                    <button class="btn-upload" onclick="document.getElementById('leaf_image').click()">Choose File</button>
-                </div>
-                <div id="preview-container" class="preview-container" style="display: none;">
-                    <img id="preview-image" src="" alt="Uploaded Image">
-                    <div class="preview-actions">
-                        <button id="cancel-btn" class="btn-cancel" type="button" style="display: none;">Cancel</button>
-                        <button id="upload-btn" class="btn-upload" type="button" style="display: none;">Upload New Image</button>
-                        <button id="predict-btn" class="btn-predict" type="button" style="display: none;">Predict</button>
-                    </div>
-                    <div id="loading" class="loading" style="display: none;">
-                        <div class="spinner"></div>
-                        <p>Analyzing image...</p>
+    <div class="app-container">
+        <!-- Page Header -->
+        <header class="page-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <span class="logo-icon">🍏</span>
+                    <div class="title-area">
+                        <h1>Apple Leaf Disease Detection</h1>
+                        <p>Two-Stage AI Classification System with Explainable AI (XAI)</p>
                     </div>
                 </div>
-            </section>
-
-            <!-- Results Section -->
-            <div id="results-section" style="display: none;">
-                <!-- Stage 1 Result -->
-                <section class="section">
-                    <h2 class="section-title">Stage 1: Apple Leaf Detection</h2>
-                    <div id="stage1-result" class="result-box"></div>
-                </section>
-
-                <!-- Stage 2 Result -->
-                <section id="stage2-section" class="section" style="display: none;">
-                    <h2 class="section-title">Stage 2: Disease Classification</h2>
-                    <div id="stage2-result" class="result-box"></div>
-                </section>
-
-                <!-- Final Diagnosis -->
-                <section class="section">
-                    <h2 class="section-title">Final Diagnosis</h2>
-                    <div id="final-diagnosis" class="diagnosis-box"></div>
-                </section>
-
-                <!-- Reset Button -->
-                <button id="reset-btn" class="btn-reset">Analyze Another Image</button>
+                <div class="header-actions">
+                    <span class="status-badge live">System Online</span>
+                </div>
             </div>
+        </header>
+
+        <!-- Error Banner -->
+        <div id="error-msg" class="error-banner">
+            <span class="error-icon">⚠️</span>
+            <span id="error-text">An error occurred.</span>
+            <button class="close-error" onclick="document.getElementById('error-msg').style.display='none'">×</button>
         </div>
 
-        <!-- Right Column -->
-        <div class="right-column">
-            <!-- Placeholder -->
-            <div id="gradcam-placeholder" class="placeholder">
-                <div class="placeholder-icon">🔍</div>
-                <p>Upload an image to view AI explainability visualization</p>
-            </div>
-
-            <!-- Grad-CAM Section -->
-            <div id="gradcam-section" style="display: none;">
-                <section class="section">
-                    <h2 class="section-title">Grad-CAM Visualization</h2>
-                    <div class="gradcam-image-container">
-                        <img id="gradcam-image" src="" alt="Grad-CAM Heatmap">
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-layout">
+            <!-- Left Panel: Input & Prediction -->
+            <div class="panel left-panel">
+                
+                <!-- Upload Section -->
+                <section class="card upload-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Image Input</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="upload-area" class="upload-area">
+                            <div class="upload-icon-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            </div>
+                            <h3>Upload Leaf Image</h3>
+                            <p>Drag and drop or click to browse</p>
+                            <span class="file-hint">Supported formats: JPG, PNG (Max 16MB)</span>
+                            <input type="file" id="leaf_image" accept="image/*" hidden>
+                        </div>
+                        
+                        <div id="preview-container" class="preview-container" style="display: none;">
+                            <div class="image-preview-wrapper">
+                                <img id="preview-image" src="" alt="Uploaded Image">
+                            </div>
+                            <div class="preview-actions">
+                                <button id="cancel-btn" class="btn btn-secondary" type="button" style="display: none;">Cancel</button>
+                                <button id="upload-btn" class="btn btn-outline" type="button" style="display: none;">Change Image</button>
+                                <button id="predict-btn" class="btn btn-primary" type="button" style="display: none;">Analyze Image</button>
+                            </div>
+                            <div id="loading" class="loading-state" style="display: none;">
+                                <div class="loader"></div>
+                                <span>Running inference pipeline...</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <section class="section">
-                    <h2 class="section-title">Attention Map Analysis</h2>
-                    <div id="attention-analysis" class="info-box"></div>
-                </section>
+                <!-- Results Section -->
+                <div id="results-section" style="display: none;" class="results-fade-in">
+                    
+                    <!-- Final Diagnosis (Moved to top for visibility) -->
+                    <section class="card highlight-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Final Diagnosis</h2>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="final-diagnosis" class="diagnosis-box"></div>
+                        </div>
+                    </section>
 
-                <section class="section">
-                    <h2 class="section-title">Explainability Details</h2>
-                    <div id="explainability-details" class="info-box"></div>
-                </section>
+                    <!-- Breakdown: Stage 1 & 2 -->
+                    <section class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Pipeline Analysis Details</h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- Stage 1 Result -->
+                            <div class="stage-result-wrapper">
+                                <h3 class="stage-title">Stage 1: Apple Leaf Verification</h3>
+                                <div id="stage1-result" class="result-box"></div>
+                            </div>
+                            
+                            <!-- Stage 2 Result -->
+                            <div id="stage2-section" class="stage-result-wrapper" style="display: none;">
+                                <h3 class="stage-title">Stage 2: Disease Classification</h3>
+                                <div id="stage2-result" class="result-box"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <button id="reset-btn" class="btn btn-block btn-secondary mt-4">Start New Analysis</button>
+                </div>
             </div>
-        </div>
+
+            <!-- Right Panel: XAI & Visualization -->
+            <div class="panel right-panel">
+                
+                <!-- Placeholder -->
+                <div id="gradcam-placeholder" class="card placeholder-card">
+                    <div class="placeholder-content">
+                        <div class="icon-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                        </div>
+                        <h3>Explainable AI (XAI) Engine</h3>
+                        <p>Upload an image to visualize the model's decision-making process using Grad-CAM attention maps.</p>
+                    </div>
+                </div>
+
+                <!-- Grad-CAM Section -->
+                <div id="gradcam-section" style="display: none;" class="results-fade-in">
+                    
+                    <section class="card visual-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Attention Heatmap (Grad-CAM)</h2>
+                            <span class="badge info">Interactive</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="comparison-view">
+                                <div class="view-panel">
+                                    <h4>Original Image</h4>
+                                    <div class="img-wrapper">
+                                        <img id="original-image-compare" src="" alt="Original Image">
+                                    </div>
+                                </div>
+                                <div class="view-panel">
+                                    <h4>Grad-CAM Focus Region</h4>
+                                    <div class="img-wrapper">
+                                        <img id="gradcam-image" src="" alt="Grad-CAM Heatmap">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Heatmap Legend -->
+                            <div class="heatmap-legend-container">
+                                <span class="legend-label">Low Attention</span>
+                                <div class="heatmap-scale"></div>
+                                <span class="legend-label">High Attention</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="insights-grid">
+                        <section class="card info-card">
+                            <div class="card-header">
+                                <h2 class="card-title">Attention Map Analysis</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="attention-analysis" class="info-content"></div>
+                            </div>
+                        </section>
+
+                        <section class="card info-card">
+                            <div class="card-header">
+                                <h2 class="card-title">Model Interpretation</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="explainability-details" class="info-content"></div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -104,54 +186,73 @@
         const uploadArea = document.getElementById('upload-area');
         const previewContainer = document.getElementById('preview-container');
         const previewImage = document.getElementById('preview-image');
+        const originalImageCompare = document.getElementById('original-image-compare');
         const uploadBtn = document.getElementById('upload-btn');
         const cancelBtn = document.getElementById('cancel-btn');
         const loading = document.getElementById('loading');
         const errorMsg = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+        
         const resultsSection = document.getElementById('results-section');
         const stage1Result = document.getElementById('stage1-result');
         const stage2Section = document.getElementById('stage2-section');
         const stage2Result = document.getElementById('stage2-result');
         const finalDiagnosis = document.getElementById('final-diagnosis');
+        
         const gradcamPlaceholder = document.getElementById('gradcam-placeholder');
         const gradcamSection = document.getElementById('gradcam-section');
         const gradcamImage = document.getElementById('gradcam-image');
         const attentionAnalysis = document.getElementById('attention-analysis');
         const explainabilityDetails = document.getElementById('explainability-details');
         const resetBtn = document.getElementById('reset-btn');
+        
         let selectedFile = null;
         let predictionAborted = false;
 
-        // File upload event
+        // File upload events
         fileInput.addEventListener('change', handleFileSelect);
         uploadBtn.addEventListener('click', () => {
-            // Open file picker to select new image
             document.getElementById('leaf_image').click();
         });
+        
         document.getElementById('predict-btn').addEventListener('click', () => {
-            if (selectedFile) {
-                predict(selectedFile);
-            }
+            if (selectedFile) predict(selectedFile);
         });
+        
         cancelBtn.addEventListener('click', cancelPrediction);
 
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
+        // Drag and drop setup
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.remove('dragover');
+            }, false);
         });
 
         uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                fileInput.files = e.dataTransfer.files;
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+                fileInput.files = files;
                 handleFileSelect();
+            } else {
+                showError("Please upload a valid image file.");
             }
         });
 
@@ -159,17 +260,18 @@
             const file = fileInput.files[0];
             if (file) {
                 selectedFile = file;
-                // Show preview
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     previewImage.src = e.target.result;
+                    originalImageCompare.src = e.target.result;
+                    
                     previewContainer.style.display = 'block';
                     uploadArea.style.display = 'none';
-                    // Show only cancel button during auto-prediction
+                    
                     cancelBtn.style.display = 'inline-block';
                     uploadBtn.style.display = 'none';
                     document.getElementById('predict-btn').style.display = 'none';
-                    // Auto-start prediction
+                    
                     predictionAborted = false;
                     predict(selectedFile);
                 };
@@ -179,9 +281,7 @@
         }
 
         function cancelPrediction() {
-            // Mark as aborted to skip results display
             predictionAborted = true;
-            // Show upload and predict buttons instead of full reset
             loading.style.display = 'none';
             cancelBtn.style.display = 'none';
             uploadBtn.style.display = 'inline-block';
@@ -192,28 +292,35 @@
             selectedFile = null;
             fileInput.value = '';
             previewImage.src = '';
+            originalImageCompare.src = '';
+            
             previewContainer.style.display = 'none';
-            uploadArea.style.display = 'block';
+            uploadArea.style.display = 'flex';
             loading.style.display = 'none';
+            
             resultsSection.style.display = 'none';
             gradcamSection.style.display = 'none';
-            gradcamPlaceholder.style.display = 'block';
-            // Reset button states
+            gradcamPlaceholder.style.display = 'flex';
+            
             cancelBtn.style.display = 'none';
             uploadBtn.style.display = 'none';
             document.getElementById('predict-btn').style.display = 'none';
+            errorMsg.style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function predict(file) {
-            // Show loading, hide results
-            loading.style.display = 'block';
+            loading.style.display = 'flex';
             cancelBtn.style.display = 'inline-block';
             cancelBtn.disabled = false;
             uploadBtn.style.display = 'none';
             document.getElementById('predict-btn').style.display = 'none';
+            
             resultsSection.style.display = 'none';
             gradcamSection.style.display = 'none';
-            gradcamPlaceholder.style.display = 'block';
+            gradcamPlaceholder.style.display = 'flex';
             errorMsg.style.display = 'none';
 
             const formData = new FormData();
@@ -222,12 +329,12 @@
             fetch('/predict', { method: 'POST', body: formData })
                 .then(response => response.json())
                 .then(data => {
-                    // Only display results if prediction wasn't aborted
                     if (!predictionAborted) {
                         loading.style.display = 'none';
                         cancelBtn.style.display = 'none';
                         uploadBtn.style.display = 'inline-block';
                         document.getElementById('predict-btn').style.display = 'inline-block';
+                        
                         if (data.success) {
                             displayResults(data);
                         } else {
@@ -246,15 +353,35 @@
                 });
         }
 
+        function createProgressBar(label, value, isPercentage = false) {
+            const percentValue = isPercentage ? value : value * 100;
+            const formattedValue = isPercentage ? value.toFixed(2) + '%' : (value * 100).toFixed(1) + '%';
+            
+            let colorClass = 'bg-primary';
+            if (percentValue > 80) colorClass = 'bg-success';
+            else if (percentValue > 50) colorClass = 'bg-warning';
+            else colorClass = 'bg-danger';
+
+            return `
+                <div class="metric-row">
+                    <div class="metric-header">
+                        <span class="metric-label">${label}</span>
+                        <span class="metric-value font-weight-bold">${formattedValue}</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill ${colorClass}" style="width: ${percentValue}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
         function displayResults(data) {
             resultsSection.style.display = 'block';
             gradcamPlaceholder.style.display = 'none';
             gradcamSection.style.display = 'block';
 
-            // Stage 1 Result
             displayStage1(data);
 
-            // Stage 2 Result (if applicable)
             if (data.stage === 2) {
                 stage2Section.style.display = 'block';
                 displayStage2(data);
@@ -262,114 +389,133 @@
                 stage2Section.style.display = 'none';
             }
 
-            // Final Diagnosis
             displayFinalDiagnosis(data);
 
-            // Grad-CAM
             if (data.gradcam_image) {
                 displayGradCAM(data);
             }
+            
+            // Trigger reflow for animations
+            void resultsSection.offsetWidth;
+            resultsSection.classList.add('visible');
+            gradcamSection.classList.add('visible');
         }
 
         function displayStage1(data) {
             const stage1 = (data.details && data.details.stage1) ? data.details.stage1 : data;
-            const stage1Category = stage1.category || data.category || '';
-            const stage1Confidence = Number(stage1.confidence ?? 0);
-            const stage1Margin = Number(stage1.margin ?? 0);
-            const icon = stage1Category === 'Not_Apple_Leaf' ? '❌' : 
-                         stage1Category === 'Apple_Healthy' ? '✅' : '⚠️';
-            const status = stage1Category === 'Not_Apple_Leaf' ? 'rejected' : 
-                          stage1Category === 'Apple_Healthy' ? 'healthy' : 'diseased';
+            const category = stage1.category || data.category || '';
+            const confidence = Number(stage1.confidence ?? 0);
+            const margin = Number(stage1.margin ?? 0);
             
-            stage1Result.className = 'result-box ' + status;
+            let icon = '⚠️';
+            let statusClass = 'status-warning';
+            
+            if (category === 'Not_Apple_Leaf') {
+                icon = '❌';
+                statusClass = 'status-danger';
+            } else if (category === 'Apple_Healthy' || category.includes('Apple')) {
+                icon = '✅';
+                statusClass = 'status-success';
+            }
+            
             stage1Result.innerHTML = `
                 <div class="result-header">
-                    <span class="result-icon">${icon}</span>
-                    <span class="result-text">${formatCategory(stage1Category)}</span>
-                </div>
-                <div class="result-details">
-                    <div class="detail-row">
-                        <span>Confidence:</span>
-                        <strong>${(stage1Confidence * 100).toFixed(1)}%</strong>
-                    </div>
-                    <div class="detail-row">
-                        <span>Margin:</span>
-                        <strong>${(stage1Margin * 100).toFixed(2)}%</strong>
+                    <div class="result-title-area">
+                        <span class="status-icon ${statusClass}">${icon}</span>
+                        <h4 class="result-title">${formatCategory(category)}</h4>
                     </div>
                 </div>
-                ${data.message ? `<p class="result-message">${data.message}</p>` : ''}
+                <div class="metrics-container">
+                    ${createProgressBar('Confidence Score', confidence)}
+                    ${createProgressBar('Decision Margin', margin)}
+                </div>
+                ${data.message ? `<div class="result-alert mt-3">${data.message}</div>` : ''}
             `;
         }
 
         function displayStage2(data) {
             const stage2 = (data.details && data.details.stage2) ? data.details.stage2 : data;
-            const stage2Disease = stage2.disease || data.disease || '';
-            const stage2DiseaseDisplay = stage2.disease_display || data.disease_display || 'Disease';
-            const stage2Confidence = Number(stage2.confidence ?? 0);
-            const stage2Margin = Number(stage2.margin ?? 0);
-            const icon = stage2Disease === 'Apple___healthy' ? '✅' : '🦠';
-            const status = stage2Disease === 'Apple___healthy' ? 'healthy' : 'diseased';
+            const disease = stage2.disease || data.disease || '';
+            const diseaseDisplay = stage2.disease_display || data.disease_display || 'Disease';
+            const confidence = Number(stage2.confidence ?? 0);
+            const margin = Number(stage2.margin ?? 0);
             
-            stage2Result.className = 'result-box ' + status;
+            let icon = '🦠';
+            let statusClass = 'status-warning';
+            
+            if (disease === 'Apple___healthy') {
+                icon = '✅';
+                statusClass = 'status-success';
+            } else {
+                icon = '🦠';
+                statusClass = 'status-danger';
+            }
+            
             stage2Result.innerHTML = `
                 <div class="result-header">
-                    <span class="result-icon">${icon}</span>
-                    <span class="result-text">${stage2DiseaseDisplay}</span>
-                </div>
-                <div class="result-details">
-                    <div class="detail-row">
-                        <span>Confidence:</span>
-                        <strong>${(stage2Confidence * 100).toFixed(1)}%</strong>
-                    </div>
-                    <div class="detail-row">
-                        <span>Margin:</span>
-                        <strong>${(stage2Margin * 100).toFixed(2)}%</strong>
+                    <div class="result-title-area">
+                        <span class="status-icon ${statusClass}">${icon}</span>
+                        <h4 class="result-title">${diseaseDisplay}</h4>
                     </div>
                 </div>
-                ${data.description ? `<p class="result-message">${data.description}</p>` : ''}
+                <div class="metrics-container">
+                    ${createProgressBar('Classification Confidence', confidence)}
+                    ${createProgressBar('Decision Margin', margin)}
+                </div>
+                ${data.description ? `<div class="result-alert mt-3">${data.description}</div>` : ''}
             `;
         }
 
         function displayFinalDiagnosis(data) {
-            let icon, title, message, status;
+            let icon, title, message, statusClass, badgeClass;
 
             if (data.category === 'Not_Apple_Leaf') {
-                icon = '❌';
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
                 title = 'Not an Apple Leaf';
-                message = 'The uploaded image does not appear to be an apple leaf.';
-                status = 'rejected';
+                message = 'The uploaded image does not appear to be an apple leaf. Please upload a clear image of an apple leaf.';
+                statusClass = 'diagnosis-danger';
+                badgeClass = 'badge-danger';
             } else if (data.stage === 2) {
                 if (data.disease === 'Apple___healthy') {
-                    icon = '✅';
+                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
                     title = 'Healthy Leaf';
-                    message = 'No disease detected. The leaf appears to be healthy.';
-                    status = 'healthy';
+                    message = 'Excellent! No disease detected. The leaf appears to be completely healthy.';
+                    statusClass = 'diagnosis-success';
+                    badgeClass = 'badge-success';
                 } else {
-                    icon = '⚠️';
+                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
                     title = data.disease_display;
-                    message = data.message || 'Disease detected on the leaf.';
-                    status = 'diseased';
+                    message = data.message || 'Disease detected on the leaf. Immediate action recommended.';
+                    statusClass = 'diagnosis-warning';
+                    badgeClass = 'badge-warning';
                 }
             } else {
-                icon = '⏳';
-                title = 'Processing';
-                message = 'Classification in progress.';
-                status = 'neutral';
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+                title = 'Processing...';
+                message = 'Classification is currently in progress.';
+                statusClass = 'diagnosis-info';
+                badgeClass = 'badge-info';
             }
 
-            finalDiagnosis.className = 'diagnosis-box ' + status;
+            finalDiagnosis.className = `diagnosis-box ${statusClass}`;
             
             let latencyHtml = '';
             if (data.latency_ms) {
-                latencyHtml = `<div class="latency-info" style="margin-top: 10px; font-size: 0.9em; color: #666;">
-                    <span title="Inference Latency">⚡ Processing Time: <strong>${data.latency_ms} ms</strong></span>
+                latencyHtml = `<div class="latency-badge mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    Inference Time: ${data.latency_ms}ms
                 </div>`;
             }
 
             finalDiagnosis.innerHTML = `
-                <div class="diagnosis-icon">${icon}</div>
+                <div class="diagnosis-icon-wrapper">
+                    ${icon}
+                </div>
                 <div class="diagnosis-content">
-                    <h3>${title}</h3>
+                    <div class="diagnosis-header">
+                        <h3>${title}</h3>
+                        <span class="badge ${badgeClass}">${statusClass.split('-')[1].toUpperCase()}</span>
+                    </div>
                     <p>${message}</p>
                     ${latencyHtml}
                 </div>
@@ -377,51 +523,69 @@
         }
 
         function displayGradCAM(data) {
-            gradcamImage.src = data.gradcam_image;
+            // Add a cache-busting query parameter to ensure the image reloads
+            gradcamImage.src = data.gradcam_image + '?t=' + new Date().getTime();
+            
             const explainMetrics = (data.details && data.details.stage2) ? data.details.stage2 : data;
 
-            // Attention Analysis
             attentionAnalysis.innerHTML = `
-                <p>The Grad-CAM (Gradient-weighted Class Activation Mapping) heatmap highlights the regions 
-                that most influenced the AI's decision. Warmer colors (red, yellow) indicate higher attention, 
-                while cooler colors (blue, purple) show lower attention areas.</p>
+                <div class="prose">
+                    <p>The Grad-CAM (Gradient-weighted Class Activation Mapping) heatmap provides a visual explanation of the model's decision-making process.</p>
+                    <ul class="feature-list">
+                        <li><span class="dot red"></span> <strong>Red/Warm regions:</strong> Highest importance for classification</li>
+                        <li><span class="dot green"></span> <strong>Green/Mid regions:</strong> Moderate importance</li>
+                        <li><span class="dot blue"></span> <strong>Blue/Cool regions:</strong> Low or no importance</li>
+                    </ul>
+                    <p class="text-sm mt-2 text-muted">By analyzing these activation areas, we can verify that the AI is focusing on actual disease symptoms rather than background artifacts.</p>
+                </div>
             `;
 
-            // Explainability Details
             let explanation = '';
+            let interpretationTitle = '';
+            
             if (data.stage === 1) {
-                explanation = 'Stage 1 focused on determining whether the image contains an apple leaf. ';
-                explanation += 'The highlighted regions were crucial for this classification.';
+                interpretationTitle = 'Leaf Verification Focus';
+                explanation = 'The model concentrated on these regions to verify the presence of an apple leaf, focusing on distinct leaf structures, edges, and textures.';
             } else if (data.stage === 2) {
                 if (data.disease === 'Apple___healthy') {
-                    explanation = 'The AI examined the leaf structure and found no signs of disease. ';
-                    explanation += 'The highlighted areas show healthy tissue patterns.';
+                    interpretationTitle = 'Healthy Tissue Verification';
+                    explanation = 'The heatmap indicates the AI systematically scanned the leaf surface and found consistent, healthy cellular patterns with no pathogenic signatures.';
                 } else {
-                    explanation = 'Disease symptoms were detected in the highlighted regions. ';
-                    explanation += 'The AI identified characteristic patterns associated with ' + data.disease_display + '.';
+                    interpretationTitle = 'Disease Symptom Localization';
+                    explanation = `The model heavily weighted the highlighted regions, which closely correspond to the visual pathology of <strong>${data.disease_display}</strong> (such as lesions, spots, or chlorosis).`;
                 }
             }
 
             explainabilityDetails.innerHTML = `
-                <p><strong>Interpretation:</strong> ${explanation}</p>
-                <p><strong>Confidence Level:</strong> ${(Number(explainMetrics.confidence ?? 0) * 100).toFixed(1)}%</p>
-                <p><strong>Decision Margin:</strong> ${(Number(explainMetrics.margin ?? 0) * 100).toFixed(2)}% (difference from next best prediction)</p>
+                <div class="interpretation-box">
+                    <h4>${interpretationTitle}</h4>
+                    <p>${explanation}</p>
+                </div>
+                <div class="metrics-grid mt-3">
+                    <div class="metric-card">
+                        <span class="metric-label">Model Confidence</span>
+                        <span class="metric-value primary">${(Number(explainMetrics.confidence ?? 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Decision Margin</span>
+                        <span class="metric-value secondary">${(Number(explainMetrics.margin ?? 0) * 100).toFixed(2)}%</span>
+                    </div>
+                </div>
             `;
         }
 
         function showError(message) {
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
+            errorText.textContent = message;
+            errorMsg.style.display = 'flex';
+            // Scroll to error
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function formatCategory(category) {
-            if (!category) {
-                return 'Unknown';
-            }
+            if (!category) return 'Unknown';
             return String(category).replace(/_/g, ' ');
         }
 
-        // Reset button
         resetBtn.addEventListener('click', resetAll);
     </script>
 </body>

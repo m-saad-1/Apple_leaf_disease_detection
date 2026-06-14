@@ -1,0 +1,26 @@
+<annotation>
+	<folder>Apple___Black_rot</folder>
+	<filename>new_1_002.JPG</filename>
+	<path>D:\WEB DEVELOPMENT\Apple_leaf_detection\annotations\selected_images\Apple___Black_rot\new_1_002.JPG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>256</width>
+		<height>256</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>labelw</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>14</xmin>
+			<ymin>29</ymin>
+			<xmax>80</xmax>
+			<ymax>111</ymax>
+		</bndbox>
+	</object>
+</annotation>
